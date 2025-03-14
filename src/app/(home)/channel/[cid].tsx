@@ -7,7 +7,7 @@ import { Channel, Message, MessageInput, MessageList, useChatContext } from 'str
 export default function ChatRoomScreen() {
     const [channel, setChannel] = useState<ChannelType | null>();
     const { cid } = useLocalSearchParams<{cid: string }>();
-    const {client} = useChatContext();
+    const { client } = useChatContext();
 
     useEffect(() => {
         const fetchChannel = async () => {

@@ -36,6 +36,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "70f10a01-54dd-4b1a-a712-19d72f5cff3e"
+      }
+    },
+    "owner": "thehashhobo"
   }
 }
