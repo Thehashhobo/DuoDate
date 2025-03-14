@@ -1,11 +1,15 @@
-import React from 'react';
+import { router, RelativePathString} from 'expo-router';
+import {useState} from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Channel as ChannelType } from "stream-chat";
+import { ChannelList } from 'stream-chat-expo';
 
 const ChatScreen = () => {
+    const [channel, setChannel] = useState<ChannelType|null>();
     return (
-        <View style={styles.container}>
-            <Text style={styles.placeholderText}>This is the Chat Screen</Text>
-        </View>
+        
+        <ChannelList 
+            onSelect={(channel) => router.push(`/channel/${channel?.cid}`)}/>
     );
 };
 
