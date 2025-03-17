@@ -5,19 +5,24 @@ import { useEffect } from "react";
 
 export default function HomeLayout() {
     const router = useRouter();
-    const { user, onboardingComplete } = useAuth();
+    const { user, profile } = useAuth();
     if (!user) {
         const linkToHome = "/(auth)/login" as Href;
         return <Redirect href={linkToHome} />;
     } 
 
     useEffect(() => {
-        if (onboardingComplete === false) {
-            console.log(onboardingComplete);
+
+        if (!profile) {
+            return;
+        }
+        console.log("profile in layout is: ", profile);
+        console.log("profile onboarding in layout is: ", profile.onboarding);
+        if (profile.onboarding === false) {
             const linkToonboard = "/(onboarding)/" as Href;
             router.replace(linkToonboard); // ✅ Now runs ONCE inside `useEffect`
         }
-    }, [onboardingComplete]); 
+    }, [profile?.id]); 
   
     return(
         <ChatProvider>

@@ -5,21 +5,22 @@ import { Session, User } from "@supabase/supabase-js";
 type AuthContext = {
     session: Session | null;
     user: User | null;
-    onboardingComplete: boolean | null;
+    profile: any | null;
     setOnboardingComplete: (value: boolean) => void; // <-- Add this
 }
 
 const AuthContext = createContext<AuthContext>({
     session: null,
     user: null,
-    onboardingComplete: null,
+    profile: null,
     setOnboardingComplete: () => {},
 
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
     const [session, setSession] = useState<Session| null>(null)
-    const [onboardingComplete, setOnboardingComplete] = useState<boolean|null>(null)
+    const [profile, setProfile] = useState(null)
+    const [onboardingComplete, setOnboardingComplete] = useState<boolean| null>(null) // <-- Add this
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,32 +36,35 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
     useEffect(() => {
         if (!session?.user) {
-            setOnboardingComplete(null);
+            setProfile(null);
             return;
           }
       
-        const fetchOnboardingStatus = async () => {
+        const fetchProfile = async () => {
             if (session?.user) {
                 const { data, error } = await supabase
                     .from("profiles")
-                    .select("onboarding")
+                    .select('*')
                     .eq("id", session.user.id)
                     .single();
-                if (!error && data && onboardingComplete === null) {
-                    setOnboardingComplete(data.onboarding);
+                if (!error && data) {
+                    // console.log("Profile data: ", data);
+                    // console.log("Profile data onboarding: ", data.onboarding);
+                    setProfile(data);
+                    // setOnboardingComplete(data.onboarding);
                 } else {
-                    setOnboardingComplete(false);
+                    console.error(error);
                 }
             }
         };
 
-        fetchOnboardingStatus();
+        fetchProfile();
         
     }, [session?.user])
     
 
     return (
-        <AuthContext.Provider value={{ session, user: session?.user ?? null, onboardingComplete, setOnboardingComplete}}>
+        <AuthContext.Provider value={{ session, user: session?.user ?? null, profile, setOnboardingComplete}}>
             {children}
         </AuthContext.Provider>
     )
