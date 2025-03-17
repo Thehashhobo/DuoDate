@@ -13,7 +13,7 @@ const infoData = [
 
 export default function InfoCards() {
   const router = useRouter();
-  const { user, setOnboardingComplete } = useAuth();
+  const { user, fetchProfile } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const screenWidth = Dimensions.get("window").width;
@@ -35,7 +35,9 @@ export default function InfoCards() {
         console.error("Error updating onboarding status:", error.message);
         return;
       }
-      setOnboardingComplete(true);
+      await fetchProfile(); // Refresh the profile data
+      // console.log("onboarding complete info card?: ", onBoardingComplete);
+      console.log("Onboarding complete! and sent to supabase");
       // Navigate to the main content
       const mainContent = "/(home)/(tabs)/discoveryScreen" as Href;
       router.replace(mainContent);

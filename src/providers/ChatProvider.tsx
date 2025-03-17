@@ -19,10 +19,10 @@ export default function ChatProvider({ children }: PropsWithChildren) {
             await client.connectUser(
                 {
                   id: profile.id as string,
-                  name: profile.name as string, // need to implement name input first 
+                  name: profile.id as string, // need to implement name input first 
                   image: "https://i.imgur.com/fR9Jz14.png",
                 },
-                client.devToken(profile?.name as string),
+                client.devToken(profile.id as string,),
               );
               setIsReady(true);
 
