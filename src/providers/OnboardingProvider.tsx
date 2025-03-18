@@ -1,10 +1,18 @@
-import React, { createContext, useReducer, ReactNode, useContext, PropsWithChildren} from 'react';
+import React, { createContext, useReducer, ReactNode, useContext, PropsWithChildren } from 'react';
 
 // Define onboarding data structure
 interface OnboardingData {
   age?: number;
   name?: string;
-  interests?: string[];
+  height?: number;
+  location?: string;
+  pronoun?: string;
+  gender?: string;
+  sexuality?: string;
+  ethnicity?: string;
+  zodiacSign?: string;
+  pets?: string;
+  photo?: string[]; // At least one required
 }
 
 // Define the shape of context state and dispatch functions
@@ -31,7 +39,7 @@ const onboardingReducer = (state: OnboardingData, action: { type: string; payloa
 
 // Provider component to wrap around the onboarding screens
 export const OnboardingProvider = ({ children }: PropsWithChildren) => {
-  const [state, dispatch] = useReducer(onboardingReducer, {});
+  const [state, dispatch] = useReducer(onboardingReducer, { photo: [] });
 
   // Action creators
   const updateField = (field: keyof OnboardingData, value: any) => {

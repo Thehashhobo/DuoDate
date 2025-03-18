@@ -36,8 +36,6 @@ export default function InfoCards() {
         return;
       }
       await fetchProfile(); // Refresh the profile data
-      // console.log("onboarding complete info card?: ", onBoardingComplete);
-      console.log("Onboarding complete! and sent to supabase");
       // Navigate to the main content
       const mainContent = "/(home)/(tabs)/discoveryScreen" as Href;
       router.replace(mainContent);
