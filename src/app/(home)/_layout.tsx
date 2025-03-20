@@ -16,8 +16,8 @@ export default function HomeLayout() {
         if (!profile) {
             return;
         }
-        console.log("profile in layout is: ", profile);
-        console.log("profile onboarding in layout is: ", profile.onboarding);
+        // console.log("profile in layout is: ", profile);
+        // console.log("profile onboarding in layout is: ", profile.onboarding);
         if (profile.onboarding === false ) {
             const linkToonboard = "/(onboarding)/" as Href;
             router.replace(linkToonboard); // ✅ Now runs ONCE inside `useEffect`

@@ -1,9 +1,8 @@
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, StyleSheet, Alert } from "react-native";
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabase'
 import { useAuth } from '../../../providers/AuthProvider'
 import { Button, Input } from '@rneui/themed'
-import { Session } from '@supabase/supabase-js'
 import Avatar from '../../../components/avatar'
 import { ScrollView } from "react-native-gesture-handler";
 
@@ -11,12 +10,13 @@ import { ScrollView } from "react-native-gesture-handler";
 export default function ProfileScreen() {
   const {session} = useAuth()
   const [loading, setLoading] = useState(true)
-  const [username, setUsername] = useState('')
-  const [website, setWebsite] = useState('')
+  const [name, setName] = useState('')
+  const [age, setAge] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
 
   useEffect(() => {
     if (session) getProfile()
+      console.log('looking for profile', session)
   }, [session])
 
   async function getProfile() {
@@ -24,20 +24,38 @@ export default function ProfileScreen() {
       setLoading(true)
       if (!session?.user) throw new Error('No user on the session!')
 
-      const { data, error, status } = await supabase
+        const { data: profileData, error: profileError, status: profileStatus } = await supabase
         .from('profiles')
-        .select(`username, website, avatar_url`)
+        .select(`name, age`)
         .eq('id', session?.user.id)
-        .single()
-      if (error && status !== 406) {
-        throw error
+        .single();
+  
+      if (profileError && profileStatus !== 406) {
+        throw profileError;
       }
 
-      if (data) {
-        setUsername(data.username)
-        setWebsite(data.website)
-        setAvatarUrl(data.avatar_url)
+      const { data: photosData, error: photosError } = await supabase
+      .from('profile_photos')
+      .select(`file_path`)
+      .eq('user_id', session?.user.id);
+      console.log('Got photos filepath', photosData)
+
+      if (photosError) {
+        throw photosError;
       }
+      if (profileData) {
+        console.log('Got profile data', profileData.age)
+        setName(profileData.name)
+        setAge(profileData.age.toString())
+        // setAvatarUrl(data.avatar_url)
+      }
+
+      if (photosData) {
+        const photoUrls = photosData.map((photo) => photo.file_path);
+        setAvatarUrl(photoUrls[0]); // Assuming you have a state variable `setPhotos`
+      }
+
+  
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message)
@@ -48,13 +66,13 @@ export default function ProfileScreen() {
   }
 
   async function updateProfile({
-    username,
-    website,
-    avatar_url,
+    name,
+    age,
+    // avatar_url,
   }: {
-    username: string
-    website: string
-    avatar_url: string
+    name: string
+    age: number
+    // avatar_url: string
   }) {
     try {
       setLoading(true)
@@ -62,9 +80,9 @@ export default function ProfileScreen() {
 
       const updates = {
         id: session?.user.id,
-        username,
-        website,
-        avatar_url,
+        name,
+        age,
+        // avatar_url,
         updated_at: new Date(),
       }
 
@@ -91,9 +109,10 @@ export default function ProfileScreen() {
           onUpload={(url: string) => {
             setAvatarUrl(url)
             updateProfile({ 
-              username, 
-              website, 
-              avatar_url: url })
+              name, 
+              age: Number(age), 
+              // avatar_url: url })
+            })
           }}
         />
       </View>
@@ -101,16 +120,16 @@ export default function ProfileScreen() {
         <Input label="Email" value={session?.user?.email} disabled />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input label="Username" value={username || ''} onChangeText={(text) => setUsername(text)} />
+        <Input label="Name" value={name || ''} onChangeText={(text) => setName(text)} />
       </View>
       <View style={styles.verticallySpaced}>
-        <Input label="Website" value={website || ''} onChangeText={(text) => setWebsite(text)} />
+        <Input label="Age" value={age} onChangeText={(text) => setAge(text)} keyboardType="numeric" />
       </View>
 
       <View style={[styles.verticallySpaced, styles.mt20]}>
         <Button
           title={loading ? 'Loading ...' : 'Update'}
-          onPress={() => updateProfile({ username, website, avatar_url: avatarUrl })}
+          onPress={() => updateProfile({ name, age: Number(age) })}
           disabled={loading}
         />
       </View>

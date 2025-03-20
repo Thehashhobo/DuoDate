@@ -30,7 +30,7 @@ const PronounGenderSexualityScreen = () => {
     updateField('gender', gender === 'Custom' ? customGender.trim() : gender);
     updateField('sexuality', sexuality === 'Custom' ? customSexuality.trim() : sexuality);
 
-    router.push('/(onboarding)/ethnicity' as Href);
+    router.push('/(onboarding)/photoUploadScreen' as Href);
   };
 
   return (
@@ -73,7 +73,7 @@ const PronounGenderSexualityScreen = () => {
 
       {/* Sexuality Section */}
       <Text>What is your sexual orientation?</Text>
-      <Picker selectedValue={sexuality} onValueChange={setSexuality}
+      <Picker selectedValue={sexuality} onValueChange={setSexuality} 
               itemStyle={{ color: '#007AFF' }}>
         <Picker.Item label="Select..." value="" />
         <Picker.Item label="Straight" value="Straight" />
