@@ -6,54 +6,109 @@ type AuthContextType = {
   session: Session | null;
   user: User | null;
   profile: any | null;
-  fetchProfile: () => Promise<void>;  // expose fetchProfile in the context
+  photos: string[] | null;
+  isLoading: boolean; // New state to track loading
+  fetchProfile: () => Promise<void>;
+  fetchProfilePhoto: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   session: null,
   user: null,
   profile: null,
+  photos: null,
+  isLoading: true, // Default to loading state
   fetchProfile: async () => {},
+  fetchProfilePhoto: async () => {},
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
+  const [photos, setPhotos] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // Track loading state
 
-  // Pull your fetchProfile logic into a reusable function
+  // Fetch Profile Data
   const fetchProfile = async () => {
-    if (!session?.user) {
-      setProfile(null);
-      return;
-    }
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", session.user.id)
-      .single();
+    try {
+      setIsLoading(true);
+      if (!session?.user) {
+        setProfile(null);
+        setIsLoading(false);
+        return;
+      }
 
-    if (error) {
-      console.error(error);
-      return;
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
+      console.log(data);
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        setIsLoading(false);
+        return;
+      }
+
+      setProfile(data);
+    } catch (error) {
+      console.error("Unexpected error fetching profile:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setProfile(data);
   };
 
+  // Fetch Profile Photos
+  const fetchProfilePhoto = async () => {
+    try {
+      setIsLoading(true);
+      if (!session?.user) {
+        setPhotos([]);
+        setIsLoading(false);
+        return;
+      }
+
+      const { data: photosData, error: photosError } = await supabase
+        .from("profile_photos")
+        .select("file_path, is_primary")
+        .eq("user_id", session.user.id);
+
+      if (photosError) throw photosError;
+
+      setPhotos(photosData.map((photo: any) => photo.file_path));
+    } catch (error) {
+      console.error("Error fetching photos:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Effect to Listen for Session Changes
   useEffect(() => {
-    // initial session check
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      
+      console.log("Session in auth provider is: ", session);
     });
+    // supabase.auth.signOut()
 
-    // listen for session changes
+
     supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
   }, []);
 
+  // Fetch Profile & Photos on Session Change
   useEffect(() => {
-    // automatically call fetchProfile whenever the user changes
-    fetchProfile();
+    if (session?.user) {
+      fetchProfile();
+      fetchProfilePhoto();
+    } else {
+      setProfile(null);
+      setPhotos([]);
+      setIsLoading(false);
+    }
   }, [session?.user]);
 
   return (
@@ -62,7 +117,10 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         session,
         user: session?.user ?? null,
         profile,
-        fetchProfile, // provide the method here
+        photos,
+        isLoading,
+        fetchProfile,
+        fetchProfilePhoto,
       }}
     >
       {children}
@@ -70,4 +128,5 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   );
 }
 
+// Hook for using authentication context
 export const useAuth = () => useContext(AuthContext);
