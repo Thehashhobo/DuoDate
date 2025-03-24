@@ -1,4 +1,4 @@
-# Welcome to Duo date 👋
+# Welcome to Duo Date 👋
 Duo Date is a cross-platform dating app designed to bring a fun, social twist to modern dating by connecting users through double date experiences. The idea was born during my time living in a fraternity house, where double dating was a popular and light-hearted way to meet new people. Duo Date aims to capture that same energy—making dating more casual, enjoyable, and collaborative.
 
 ### The application is currently in development, having commenced on March 1, 2025. We are targeting a launch date of May 1, 2025.
